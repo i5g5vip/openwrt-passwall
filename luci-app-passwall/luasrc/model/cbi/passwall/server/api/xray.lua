@@ -14,9 +14,8 @@ function gen_config(user)
             for i = 1, #user.uuid do
                 clients[i] = {
                     id = user.uuid[i],
-                    flow = (user.xtls and user.xtls == "1") and user.flow or nil,
-                    level = tonumber(user.level),
-                    alterId = tonumber(user.alter_id)
+                    flow = ("1" == user.xtls) and user.flow or nil,
+                    alterId = user.alter_id and tonumber(user.alter_id) or nil
                 }
             end
             settings = {
@@ -26,8 +25,8 @@ function gen_config(user)
         end
     elseif user.protocol == "socks" then
         settings = {
-            auth = (user.auth and user.auth == "1") and "password" or "noauth",
-            accounts = (user.auth and user.auth == "1") and {
+            auth = ("1" == user.auth) and "password" or "noauth",
+            accounts = ("1" == user.auth) and {
                 {
                     user = user.username,
                     pass = user.password
@@ -37,7 +36,7 @@ function gen_config(user)
     elseif user.protocol == "http" then
         settings = {
             allowTransparent = false,
-            accounts = (user.auth and user.auth == "1") and {
+            accounts = ("1" == user.auth) and {
                 {
                     user = user.username,
                     pass = user.password
@@ -50,7 +49,6 @@ function gen_config(user)
         settings = {
             method = user.method,
             password = user.password,
-            level = tonumber(user.level) or 1,
             network = user.ss_network or "TCP,UDP"
         }
     elseif user.protocol == "trojan" then
@@ -58,8 +56,8 @@ function gen_config(user)
             local clients = {}
             for i = 1, #user.uuid do
                 clients[i] = {
+                    flow = ("1" == user.xtls) and user.flow or nil,
                     password = user.uuid[i],
-                    level = tonumber(user.level)
                 }
             end
             settings = {
@@ -70,11 +68,35 @@ function gen_config(user)
         settings = {
             users = {
                 {
-                    level = tonumber(user.level) or 1,
                     secret = (user.password == nil) and "" or user.password
                 }
             }
         }
+    end
+
+    if user.fallback and user.fallback == "1" then
+        local fallbacks = {}
+        for i = 1, #user.fallback_list do
+            local fallbackStr = user.fallback_list[i]
+            if fallbackStr then
+                local tmp = {}
+                string.gsub(fallbackStr, '[^' .. "," .. ']+', function(w)
+                    table.insert(tmp, w)
+                end)
+                local dest = tmp[1] or ""
+                local path = tmp[2]
+                if dest:find("%.") then
+                else
+                    dest = tonumber(dest)
+                end
+                fallbacks[i] = {
+                    path = path,
+                    dest = dest,
+                    xver = 1
+                }
+            end
+        end
+        settings.fallbacks = fallbacks
     end
 
     routing = {
@@ -89,15 +111,29 @@ function gen_config(user)
     }
 
     if user.transit_node and user.transit_node ~= "nil" then
+        local transit_node_t = ucic:get_all("passwall", user.transit_node)
+        if user.transit_node == "_socks" or user.transit_node == "_http" then
+            transit_node_t = {
+                type = "Xray",
+                protocol = user.transit_node:gsub("_", ""),
+                transport = "tcp",
+                address = user.transit_node_address,
+                port = user.transit_node_port,
+                username = (user.transit_node_username and user.transit_node_username ~= "") and user.transit_node_username or nil,
+                password = (user.transit_node_password and user.transit_node_password ~= "") and user.transit_node_password or nil,
+            }
+        end
         local gen_xray = require("luci.model.cbi.passwall.api.gen_xray")
-        local client = gen_xray.gen_outbound(ucic:get_all("passwall", user.transit_node), "transit")
-        table.insert(outbounds, 1, client)
+        local outbound = gen_xray.gen_outbound(transit_node_t, "transit")
+        if outbound then
+            table.insert(outbounds, 1, outbound)
+        end
     end
 
     local config = {
         log = {
             -- error = "/var/etc/passwall_server/log/" .. user[".name"] .. ".log",
-            loglevel = (user.log and user.log == "1") and user.loglevel or "none"
+            loglevel = ("1" == user.log) and user.loglevel or "none"
         },
         -- 传入连接
         inbounds = {
@@ -109,8 +145,11 @@ function gen_config(user)
                 streamSettings = {
                     network = user.transport,
                     security = "none",
-                    xtlsSettings = (user.tls and user.tls == "1" and user.xtls and user.xtls == "1") and {
-                        --alpn = {"http/1.1"},
+                    xtlsSettings = ("1" == user.tls and "1" == user.xtls) and {
+                        alpn = {
+                            "h2",
+                            "http/1.1"
+                        },
                         disableSystemRoot = false,
                         certificates = {
                             {
@@ -119,7 +158,11 @@ function gen_config(user)
                             }
                         }
                     } or nil,
-                    tlsSettings = (user.tls and user.tls == "1") and {
+                    tlsSettings = ("1" == user.tls) and {
+                        alpn = {
+                            "h2",
+                            "http/1.1"
+                        },
                         disableSystemRoot = false,
                         certificates = {
                             {
@@ -129,6 +172,7 @@ function gen_config(user)
                         }
                     } or nil,
                     tcpSettings = (user.transport == "tcp") and {
+                        acceptProxyProtocol = (user.acceptProxyProtocol and user.acceptProxyProtocol == "1") and true or false,
                         header = {
                             type = user.tcp_guise,
                             request = (user.tcp_guise == "http") and {
@@ -151,7 +195,7 @@ function gen_config(user)
                         header = {type = user.mkcp_guise}
                     } or nil,
                     wsSettings = (user.transport == "ws") and {
-                        acceptProxyProtocol = false,
+                        acceptProxyProtocol = (user.acceptProxyProtocol and user.acceptProxyProtocol == "1") and true or false,
                         headers = (user.ws_host) and {Host = user.ws_host} or nil,
                         path = user.ws_path
                     } or nil,
@@ -165,6 +209,9 @@ function gen_config(user)
                         security = user.quic_security,
                         key = user.quic_key,
                         header = {type = user.quic_guise}
+                    } or nil,
+                    grpcSettings = (user.transport == "grpc") and {
+                        serviceName = user.grpc_serviceName
                     } or nil
                 }
             }
@@ -174,17 +221,12 @@ function gen_config(user)
         routing = routing
     }
 
-    if user.tls and user.tls == "1" then
+    if "1" == user.tls then
         config.inbounds[1].streamSettings.security = "tls"
         if user.xtls and user.xtls == "1" then
             config.inbounds[1].streamSettings.security = "xtls"
             config.inbounds[1].streamSettings.tlsSettings = nil
         end
-    end
-
-    if user.transport == "mkcp" or user.transport == "quic" then
-        config.inbounds[1].streamSettings.security = "none"
-        config.inbounds[1].streamSettings.tlsSettings = nil
     end
 
     return config

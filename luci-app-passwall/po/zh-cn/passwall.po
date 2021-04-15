@@ -130,9 +130,6 @@ msgstr "0为不使用"
 msgid "Same as the tcp node"
 msgstr "与TCP节点相同"
 
-msgid "Same as the tcp %s node"
-msgstr "与TCP%s节点相同"
-
 msgid "New process"
 msgstr "另开进程"
 
@@ -163,11 +160,17 @@ msgstr "自定义DNS"
 msgid "IP:Port mode ecceptable for specify other filtered name services."
 msgstr "定义接受 IP:Port 形式的输入，以指定其它域名服务的过滤服务。"
 
-msgid "Resolver For Local/WhiteList Domains"
-msgstr "解析本地和白名单域名"
+msgid "Local DNS"
+msgstr "本地DNS"
+
+msgid "Remote DNS"
+msgstr "远程DNS"
 
 msgid "IP:Port mode acceptable, multi value split with english comma."
 msgstr "接受 IP:Port 形式的输入，多个以英文逗号分隔。"
+
+msgid "If you use dns2socks, only the first one is valid."
+msgstr "如果使用dns2socks，只有第一个生效。"
 
 msgid "When the selection is not the default, this DNS is forced to be set to dnsmasq upstream DNS."
 msgstr "当选择的不是默认，则将此DNS强制设置为dnsmasq上游DNS。"
@@ -217,9 +220,6 @@ msgstr "请确保此Socks服务可用。"
 msgid "ChinaDNS-NG Fair Mode"
 msgstr "ChinaDNS-NG 公平模式"
 
-msgid "Filtered DNS(For Proxied Domains)"
-msgstr "域名过滤服务(用于被代理的域名)"
-
 msgid "Format must be:"
 msgstr "格式必须为："
 
@@ -232,8 +232,8 @@ msgstr "DoH Bootstrap DNS"
 msgid "The Bootstrap DNS server is used to resolve the IP address of the DoH resolver you specify as the upstream."
 msgstr "Bootstrap DNS 服务器用于解析您指定为上游的 DoH 解析器的 IP 地址。"
 
-msgid "IP:Port mode acceptable, the 1st for 'dns2socks' if split with english comma."
-msgstr "接受 IP:Port 形式的输入，多个以英文逗号分隔 ，'dns2socks' 模式下仅首个有效。"
+msgid "China list or gfwlist cannot be used together with outside China list!"
+msgstr "中国列表不能和中国列表外或防火墙表一起使用！"
 
 msgid "Cache Resolved"
 msgstr "缓存解析结果"
@@ -292,6 +292,9 @@ msgstr "单进程"
 msgid "Proxy Mode"
 msgstr "代理模式"
 
+msgid "%s Proxy Mode"
+msgstr "%s 代理模式"
+
 msgid "If not available, try clearing the cache."
 msgstr "如果无法使用，请尝试清除缓存。"
 
@@ -331,11 +334,11 @@ msgstr "添加节点"
 msgid "Add the node via the link"
 msgstr "通过链接添加节点"
 
-msgid "SS/SSR/V2ray/Trojan Link"
-msgstr "SS/SSR/V2ray/Trojan链接"
+msgid "SS/SSR/Vmess/VLESS/Trojan Link"
+msgstr "SS/SSR/Vmess/VLESS/Trojan链接"
 
-msgid "Please enter the correct link, ss:// ssr:// vmess:// trojan://"
-msgstr "请输入正确的链接，ss:// ssr:// vmess:// trojan://"
+msgid "Please enter the correct link, ss:// ssr:// vmess:// vless:// trojan://"
+msgstr "请输入正确的链接，ss:// ssr:// vmess:// vless:// trojan://"
 
 msgid "Clear all nodes"
 msgstr "清空所有节点"
@@ -412,11 +415,20 @@ msgstr "V2ray 分流"
 msgid "Preproxy"
 msgstr "前置代理"
 
+msgid "Direct Connection"
+msgstr "直连"
+
+msgid "Blackhole"
+msgstr "黑洞"
+
 msgid "Use the default node for the transit."
 msgstr "使用默认节点代理转发。"
 
 msgid "No shunt rules? Click me to go to add."
 msgstr "没有分流规则？点我前往去添加。"
+
+msgid "Use this node proxy to forward the default node."
+msgstr "使用此节点代理转发默认节点。"
 
 msgid "Domain Strategy"
 msgstr "域名解析策略"
@@ -436,14 +448,11 @@ msgstr "负载均衡节点列表"
 msgid "Load balancing node list, <a target='_blank' href='https://toutyrater.github.io/routing/balance2.html'>document</a>"
 msgstr "负载均衡节点列表，<a target='_blank' href='https://toutyrater.github.io/routing/balance2.html'>文档原理</a>"
 
-msgid "Share Current"
-msgstr "所见即所得"
-
 msgid "From Share URL"
-msgstr "导入配置信息"
+msgstr "导入分享URL"
 
 msgid "Build Share URL"
-msgstr "导出配置信息"
+msgstr "导出分享URL"
 
 msgid "Import Finished"
 msgstr "导入完成："
@@ -452,19 +461,16 @@ msgid "Not a supported scheme:"
 msgstr "不支持这种样式的："
 
 msgid "Invalid Share URL Format"
-msgstr "无效的分享信息"
-
-msgid "User cancelled"
-msgstr "用户已取消"
+msgstr "无效的分享URL信息"
 
 msgid "Paste Share URL Here"
 msgstr "在此处粘贴分享信息"
 
-msgid "Unable share to clipboard, copy to batch mode still:"
-msgstr "无法分享网址到剪贴板，复制到批量导入临时输入："
+msgid "Share URL to clipboard unable."
+msgstr "无法分享URL到剪贴板。"
 
-msgid "Share to clipboard successfully, copy to batch mode still:"
-msgstr "成功复制分享网址到剪贴板和批量导入临时输入："
+msgid "Share URL to clipboard successfully."
+msgstr "成功复制分享URL到剪贴板。"
 
 msgid "Faltal on get option, please help in debug:"
 msgstr "代码错误，请协助捉虫："
@@ -522,6 +528,9 @@ msgstr "选中后保存应用后即使用tcping替换ping检测节点"
 
 msgid "Concise display nodes"
 msgstr "简洁显示节点"
+
+msgid "Show server address and port"
+msgstr "显示服务器地址和端口"
 
 msgid "Apply"
 msgstr "应用"
@@ -715,6 +724,9 @@ msgstr "中国IP段(chnroute)更新URL"
 msgid "China IPv6s(chnroute6) Update URL"
 msgstr "中国IPv6段(chnroute6)更新URL"
 
+msgid "China List(Chnlist) Update URL"
+msgstr "中国域名列表(Chnlist)更新URL"
+
 msgid "Rule status"
 msgstr "规则版本"
 
@@ -738,6 +750,18 @@ msgstr "周"
 
 msgid "oclock"
 msgstr "点"
+
+msgid "Location of Xray asset"
+msgstr "Xray 资源文件目录"
+
+msgid "This variable specifies a directory where geoip.dat and geosite.dat files are."
+msgstr "此变量指定geoip.dat和geosite.dat文件所在的目录。"
+
+msgid "Shunt Rule"
+msgstr "分流规则"
+
+msgid "Please note attention to the priority, the higher the order, the higher the priority."
+msgstr "请注意优先级问题，排序越上面优先级越高。"
 
 msgid "Update..."
 msgstr "更新中"
@@ -820,20 +844,14 @@ msgstr "手动订阅"
 msgid "Delete All Subscribe Node"
 msgstr "删除所有订阅节点"
 
-msgid "Filter keyword switch"
-msgstr "过滤关键字开关"
+msgid "Filter keyword Mode"
+msgstr "过滤关键字模式"
 
-msgid "When checked, below options can only be take effect."
-msgstr "当勾选时，下面的选项才生效。"
+msgid "Discard List"
+msgstr "丢弃列表"
 
-msgid "Filter keyword"
-msgstr "过滤关键字"
-
-msgid "Filter keyword discarded"
-msgstr "关键字丢弃"
-
-msgid "When checked, the keywords in the list are discarded. Otherwise, it is not discarded."
-msgstr "当勾选时，将丢弃包含列表里的关键字的节点。否则，将保留列表的关键字的节点（反过来）。"
+msgid "Keep List"
+msgstr "保留列表"
 
 msgid "Add"
 msgstr "添加"
@@ -853,17 +871,26 @@ msgstr "直连列表"
 msgid "Proxy List"
 msgstr "代理列表"
 
+msgid "Block List"
+msgstr "屏蔽列表"
+
 msgid "Join the direct hosts list of domain names will not proxy."
 msgstr "加入的域名不走代理，对所有模式有效。且优先级最高。"
 
 msgid "These had been joined ip addresses will not proxy. Please input the ip address or ip address segment,every line can input only one ip address. For example: 192.168.0.0/24 or 223.5.5.5."
 msgstr "加入的IP段不走代理，对所有模式有效。且优先级最高。可输入IP地址或地址段，如：192.168.0.0/24或223.5.5.5，每个地址段一行。"
 
-msgid "These had been joined websites will use proxy. Please input the domain names of websites,every line can input only one website domain. For example: google.com."
+msgid "These had been joined websites will use proxy. Please input the domain names of websites, every line can input only one website domain. For example: google.com."
 msgstr "加入的域名将走代理。输入网站域名，如：google.com，每个地址段一行。"
 
-msgid "These had been joined ip addresses will use proxy.Please input the ip address or ip address segment,every line can input only one ip address.For example: 35.24.0.0/24 or 8.8.4.4."
+msgid "These had been joined ip addresses will use proxy. Please input the ip address or ip address segment, every line can input only one ip address. For example: 35.24.0.0/24 or 8.8.4.4."
 msgstr "加入的IP段将走代理。可输入IP地址或地址段，如：35.24.0.0/24或8.8.4.4，每个地址段一行。"
+
+msgid "These had been joined websites will be block. Please input the domain names of websites, every line can input only one website domain. For example: twitter.com."
+msgstr "加入的域名将屏蔽。输入网站域名，如：twitter.com，每个地址段一行。"
+
+msgid "These had been joined ip addresses will be block. Please input the ip address or ip address segment, every line can input only one ip address."
+msgstr "加入的IP段将屏蔽。可输入IP地址或地址段，每个地址段一行。"
 
 msgid "Not valid domain name, please re-enter!"
 msgstr "不是有效域名，请重新输入！"
@@ -1057,6 +1084,12 @@ msgstr "节点数量"
 msgid "You can only set up a maximum of %s nodes for the time being, Used for access control."
 msgstr "目前最多只能设置%s个节点，用于给访问控制使用。"
 
+msgid "IPv6 TProxy"
+msgstr "IPv6透明代理(TProxy)"
+
+msgid "Experimental feature.Make sure that your node supports IPv6."
+msgstr "实验特性，请确保你的节点支持IPv6"
+
 msgid "Status info"
 msgstr "状态信息"
 
@@ -1078,14 +1111,23 @@ msgstr "当你隐藏后想再次显示，地址栏输入例："
 msgid "The MTProto protocol must be 32 characters and can only contain characters from 0 to 9 and a to f."
 msgstr "MTProto 协议必须为 32 个字符，仅可包含 0 到 9 和 a 到 f 之间的字符。"
 
+msgid "Whether to receive PROXY protocol, when this node want to be fallback or forwarded by proxy, it must be enable, otherwise it cannot be used."
+msgstr "是否接收 PROXY protocol，当该节点要被回落或被代理转发时，必须启用，否则不能使用。"
+
 msgid "transit node"
 msgstr "中转到此节点"
+
+msgid "Custom Socks"
+msgstr "自定义 Socks"
+
+msgid "Custom HTTP"
+msgstr "自定义 HTTP"
 
 msgid "Bind Local"
 msgstr "本机监听"
 
-msgid "When selected, it can only be accessed locally,It is recommended to turn on when using reverse proxies."
-msgstr "当勾选时，只能由本机访问此端口，当开启反向代理时建议勾选此项。"
+msgid "When selected, it can only be accessed locally, It is recommended to turn on when using reverse proxies or be fallback."
+msgstr "当勾选时，只能由本机访问此端口，当想被反向代理或被回落时建议勾选此项。"
 
 msgid "Accept LAN Access"
 msgstr "接受局域网访问"
@@ -1134,6 +1176,9 @@ msgstr "日志"
 
 msgid "Log"
 msgstr "日志"
+
+msgid "%s Node Log Close"
+msgstr "%s 节点日志关闭"
 
 msgid "Log Level"
 msgstr "日志等级"

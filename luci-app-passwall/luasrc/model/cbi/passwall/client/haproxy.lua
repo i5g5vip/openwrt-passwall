@@ -1,7 +1,7 @@
 local e = require "luci.sys"
 local net = require "luci.model.network".init()
 local api = require "luci.model.cbi.passwall.api.api"
-local appname = "passwall"
+local appname = api.appname
 
 local nodes_table = {}
 for k, e in ipairs(api.get_valid_nodes()) do
@@ -9,7 +9,7 @@ for k, e in ipairs(api.get_valid_nodes()) do
         nodes_table[#nodes_table + 1] = {
             id = e[".name"],
             obj = e,
-            remarks = e.remarks_name
+            remarks = e["remark"]
         }
     end
 end
@@ -30,19 +30,19 @@ o.default = false
 ---- Console Username
 o = s:option(Value, "console_user", translate("Console Username"))
 o.default = ""
-o:depends("balancing_enable", 1)
+o:depends("balancing_enable", true)
 
 ---- Console Password
 o = s:option(Value, "console_password", translate("Console Password"))
 o.password = true
 o.default = ""
-o:depends("balancing_enable", 1)
+o:depends("balancing_enable", true)
 
 ---- Console Port
 o = s:option(Value, "console_port", translate("Console Port"), translate(
                  "In the browser input routing IP plus port access, such as:192.168.1.1:1188"))
 o.default = "1188"
-o:depends("balancing_enable", 1)
+o:depends("balancing_enable", true)
 
 -- [[ Balancing Settings ]]--
 s = m:section(TypedSection, "haproxy_config", "",
@@ -82,7 +82,6 @@ o.default = "5"
 o.rmempty = false
 
 ---- Export
---[[
 o = s:option(ListValue, "export", translate("Export Of Multi WAN"))
 o:value(0, translate("Auto"))
 local ifaces = e.net:devices()
@@ -97,7 +96,6 @@ for _, iface in ipairs(ifaces) do
 end
 o.default = 0
 o.rmempty = false
-]]--
 
 ---- Mode
 o = s:option(ListValue, "backup", translate("Mode"))

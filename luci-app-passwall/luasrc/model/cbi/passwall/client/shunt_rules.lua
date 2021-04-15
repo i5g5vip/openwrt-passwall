@@ -1,8 +1,8 @@
-local d = require "luci.dispatcher"
-local appname = "passwall"
+local api = require "luci.model.cbi.passwall.api.api"
+local appname = api.appname
 
-m = Map(appname, "Xray/V2ray" .. translate("Shunt") .. translate("Rule"))
-m.redirect = d.build_url("admin", "services", appname)
+m = Map(appname, "Xray" .. translate("Shunt") .. translate("Rule"))
+m.redirect = api.url()
 
 s = m:section(NamedSection, arg[1], "shunt_rules", "")
 s.addremove = false
@@ -11,6 +11,11 @@ s.dynamic = false
 remarks = s:option(Value, "remarks", translate("Remarks"))
 remarks.default = arg[1]
 remarks.rmempty = false
+
+protocol = s:option(MultiValue, "protocol", translate("Protocol"))
+protocol:value("http")
+protocol:value("tls")
+protocol:value("bittorrent")
 
 domain_list = s:option(TextValue, "domain_list", translate("Domain"))
 domain_list.rows = 10
@@ -57,7 +62,7 @@ ip_list.validate = function(self, value)
         if ipmask:find("geoip:") and ipmask:find("geoip:") == 1 then
         elseif ipmask:find("ext:") and ipmask:find("ext:") == 1 then
         else
-            if not datatypes.ipmask4(ipmask) then
+            if not (datatypes.ipmask4(ipmask) or datatypes.ipmask6(ipmask)) then
                 return nil, ipmask .. " " .. translate("Not valid IP format, please re-enter!")
             end
         end

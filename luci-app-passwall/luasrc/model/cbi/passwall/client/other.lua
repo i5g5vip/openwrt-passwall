@@ -1,5 +1,5 @@
-local uci = require"luci.model.uci".cursor()
-local appname = "passwall"
+local api = require "luci.model.cbi.passwall.api.api"
+local appname = api.appname
 
 m = Map(appname)
 
@@ -28,21 +28,21 @@ o.rmempty = false
 ---- Automatically turn off time
 o = s:option(ListValue, "time_off", translate("Automatically turn off time"))
 o.default = nil
-o:depends("auto_on", "1")
+o:depends("auto_on", true)
 o:value(nil, translate("Disable"))
 for e = 0, 23 do o:value(e, e .. translate("oclock")) end
 
 ---- Automatically turn on time
 o = s:option(ListValue, "time_on", translate("Automatically turn on time"))
 o.default = nil
-o:depends("auto_on", "1")
+o:depends("auto_on", true)
 o:value(nil, translate("Disable"))
 for e = 0, 23 do o:value(e, e .. translate("oclock")) end
 
 ---- Automatically restart time
 o = s:option(ListValue, "time_restart", translate("Automatically restart time"))
 o.default = nil
-o:depends("auto_on", "1")
+o:depends("auto_on", true)
 o:value(nil, translate("Disable"))
 for e = 0, 23 do o:value(e, e .. translate("oclock")) end
 --]]
@@ -83,16 +83,6 @@ o.default = "1:65535"
 o:value("1:65535", translate("All"))
 o:value("53", "DNS")
 
----- Multi SS/SSR Process Option
-o = s:option(Value, "process", translate("Multi Process Option"))
-o.default = "0"
-o.rmempty = false
-o:value("0", translate("Auto"))
-o:value("1", translate("1 Process"))
-o:value("2", "2 " .. translate("Process"))
-o:value("3", "3 " .. translate("Process"))
-o:value("4", "4 " .. translate("Process"))
-
 --[[
 ---- Proxy IPv6
 o = s:option(Flag, "proxy_ipv6", translate("Proxy IPv6"),
@@ -121,28 +111,17 @@ o.rmempty = true
 --]]
 
 -- [[ Other Settings ]]--
-s = m:section(TypedSection, "global_other", translate("Other Settings"),
-              "<font color='red'>" .. translatef(
-                  "You can only set up a maximum of %s nodes for the time being, Used for access control.",
-                  "3") .. "</font>")
+s = m:section(TypedSection, "global_other", translate("Other Settings"))
 s.anonymous = true
 s.addremove = false
 
----- TCP Node Number Option
-o = s:option(ListValue, "tcp_node_num", "TCP" .. translate("Node Number"))
-o.default = "1"
+---- IPv6 TProxy
+o = s:option(Flag, "ipv6_tproxy", translate("IPv6 TProxy"),
+             "<font color='red'>" .. translate(
+                 "Experimental feature.Make sure that your node supports IPv6.") ..
+                 "</font>")
+o.default = 0
 o.rmempty = false
-o:value("1")
-o:value("2")
-o:value("3")
-
----- UDP Node Number Option
-o = s:option(ListValue, "udp_node_num", "UDP" .. translate("Node Number"))
-o.default = "1"
-o.rmempty = false
-o:value("1")
-o:value("2")
-o:value("3")
 
 o = s:option(MultiValue, "status", translate("Status info"))
 o:value("big_icon", translate("Big icon")) -- 大图标

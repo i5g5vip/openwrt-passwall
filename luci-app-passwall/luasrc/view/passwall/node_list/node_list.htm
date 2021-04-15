@@ -1,11 +1,7 @@
 <%
-	-- Copyright (C) 2018-2020 L-WRT Team
-	local api = require "luci.model.cbi.passwall.api.api"
-	local dsp = require "luci.dispatcher"
-	
-	local tcp_node_num = api.uci_get_type("global_other", "tcp_node_num", 1)
-	local udp_node_num = api.uci_get_type("global_other", "udp_node_num", 1)
-	local nodes_display = api.uci_get_type("global_other", "nodes_display", "")
+-- Copyright (C) 2018-2020 L-WRT Team
+-- Copyright (C) 2021 xiaorouji
+local api = require "luci.model.cbi.passwall.api.api"
 -%>
 
 <style>
@@ -31,12 +27,8 @@ table td, .table .td {
     box-shadow: darkgrey 10px 10px 30px 5px;
 }
 
-._select {
-	background: #dad8d8;
-}
-
 ._now_use {
-	background: #94e1ff;
+	background: #94e1ff !important;
 }
 
 .ping a:hover{
@@ -98,7 +90,7 @@ table td, .table .td {
 	}
 	
 	function copy_node(cbi_id) {
-		window.location.href = '<%=dsp.build_url("admin/services/passwall/copy_node")%>' + "?section=" + cbi_id;
+		window.location.href = '<%=api.url("copy_node")%>' + "?section=" + cbi_id;
 	}
 	
 	var section = "";
@@ -129,82 +121,65 @@ table td, .table .td {
 		}
 	}
 	
-	function select_node_div(btn, id) {
-		btn.value = "<%:DeSelect%>";
-		btn.setAttribute("onclick", "deselect_node_div(this, '" + id + "')");
-		var dom = document.getElementById("cbi-passwall-" + id);
-		if (dom) {
-			dom.classList.add("_select");
-			dom.setAttribute("nodes_id", id);
-		}
-	}
-	
-	function deselect_node_div(btn, id) {
-		btn.value = "<%:Select%>";
-		btn.setAttribute("onclick", "select_node_div(this, '" + id + "')");
-		var dom = document.getElementById("cbi-passwall-" + id);
-		if (dom) {
-			dom.classList.remove("_select");
-			dom.removeAttribute("nodes_id");
-		}
-	}
-	
-	function select_all(btn) {
-		var doms = document.getElementById("cbi-passwall-nodes").getElementsByClassName("cbi-section-table-row");
+	function checked_all_node(btn) {
+		var doms = document.getElementById("cbi-passwall-nodes").getElementsByClassName("nodes_select");
 		if (doms && doms.length > 0) {
 			for (var i = 0 ; i < doms.length; i++) {
-				var id = doms[i].id.replace("cbi-passwall-", "");
-				var btn2 = document.getElementById("select_" + id);
-				select_node_div(btn2, id);
+				doms[i].checked = true;
 			}
 			btn.value = "<%:DeSelect all%>";
-			btn.setAttribute("onclick", "deselect_all(this)");
+			btn.setAttribute("onclick", "dechecked_all_node(this)");
 		}
 	}
 	
-	function deselect_all(btn) {
-		var doms = document.getElementById("cbi-passwall-nodes").getElementsByClassName("cbi-section-table-row");
+	function dechecked_all_node(btn) {
+		var doms = document.getElementById("cbi-passwall-nodes").getElementsByClassName("nodes_select");
 		if (doms && doms.length > 0) {
 			for (var i = 0 ; i < doms.length; i++) {
-				var id = doms[i].id.replace("cbi-passwall-", "");
-				var btn2 = document.getElementById("select_" + id);
-				deselect_node_div(btn2, id);
+				doms[i].checked = false;
 			}
 			btn.value = "<%:Select all%>";
-			btn.setAttribute("onclick", "select_all(this)");
+			btn.setAttribute("onclick", "checked_all_node(this)");
 		}
 	}
 	
 	function delete_select_nodes() {
-		var doms = document.getElementsByClassName("_select");
+		var ids = [];
+		var doms = document.getElementById("cbi-passwall-nodes").getElementsByClassName("nodes_select");
 		if (doms && doms.length > 0) {
-			var ids = [];
 			for (var i = 0 ; i < doms.length; i++) {
-				if (doms[i].getAttribute("nodes_id")) {
-					ids.push(doms[i].getAttribute("nodes_id"))
+				if (doms[i].checked) {
+					ids.push(doms[i].getAttribute("cbid"))
 				}
 			}
-			if (confirm('<%:Are you sure to delete select nodes?%>') == true){
-				XHR.get('<%=dsp.build_url("admin/services/passwall/delete_select_nodes")%>', {
-					ids: ids.join()
-				},
-				function(x, data) {
-					if(x && x.status == 200) {
-						window.location.href = '<%=dsp.build_url("admin/services/passwall/node_list")%>';
-					}
-					else {
-						alert("<%:Error%>");
-					}
-				});
+			if (ids.length > 0) {
+				if (confirm('<%:Are you sure to delete select nodes?%>') == true){
+					XHR.get('<%=api.url("delete_select_nodes")%>', {
+						ids: ids.join()
+					},
+					function(x, data) {
+						if (x && x.status == 200) {
+							for (var i = 0 ; i < ids.length; i++) {
+								var box = document.getElementById("cbi-passwall-" + ids[i]);
+								box.remove();
+							}
+							//window.location.href = '<%=api.url("node_list")%>';
+						}
+						else {
+							alert("<%:Error%>");
+						}
+					});
+				}
 			}
-		} else {
+		}
+		if (ids.length <= 0) {
 			alert("<%:You no select nodes !%>");
 		}
 	}
 	
-	function set_node(protocol,number) {
-		if (confirm('<%:Are you sure set to%> ' + protocol.toUpperCase() + "_" + number + '<%:the server?%>')==true){
-			window.location.href = '<%=dsp.build_url("admin/services/passwall/set_node")%>?protocol=' + protocol + '&number=' + number + '&section=' + section;
+	function set_node(protocol) {
+		if (confirm('<%:Are you sure set to%> ' + protocol.toUpperCase() + '<%:the server?%>')==true){
+			window.location.href = '<%=api.url("set_node")%>?protocol=' + protocol + '&section=' + section;
 		}
 	}
 	
@@ -225,28 +200,24 @@ table td, .table .td {
 	
 	//获取当前使用的节点
 	function get_now_use_node() {
-		XHR.get('<%=dsp.build_url("admin/services/passwall/get_now_use_node")%>', null,
+		XHR.get('<%=api.url("get_now_use_node")%>', null,
 			function(x, result) {
-				for (var i = 1; i <= result.udp; i++) {
-					var id = result["UDP" + i];
-					if (id) {
-						var dom = document.getElementById("cbi-passwall-" + id);
-						if (dom) {
-							dom.classList.add("_now_use");
-							dom.title = "当前UDP" + i + "节点";
-						}
+				var id = result["TCP"];
+				if (id) {
+					var dom = document.getElementById("cbi-passwall-" + id);
+					if (dom) {
+						dom.classList.add("_now_use");
+						dom.title = "当前TCP节点";
+						//var v = "<a style='color: red'>当前TCP节点：</a>" + document.getElementById("cbid.passwall." + id + ".remarks").value;
+						//document.getElementById("cbi-passwall-" + id + "-remarks").innerHTML = v;
 					}
 				}
-				for (var i = 1; i <= result.tcp; i++) {
-					var id = result["TCP" + i];
-					if (id) {
-						var dom = document.getElementById("cbi-passwall-" + id);
-						if (dom) {
-							dom.classList.add("_now_use");
-							dom.title = "当前TCP" + i + "节点";
-							//var v = "当前使用：" + document.getElementById("cbid.passwall." + id + ".remarks").value;
-							//document.getElementById("cbi-passwall-" + id + "-remarks").innerHTML = v;
-						}
+				id = result["UDP"];
+				if (id) {
+					var dom = document.getElementById("cbi-passwall-" + id);
+					if (dom) {
+						dom.classList.add("_now_use");
+						dom.title = "当前UDP节点";
 					}
 				}
 			}
@@ -256,7 +227,7 @@ table td, .table .td {
 	function ping_node(cbi_id, dom) {
 		var full = get_address_full(cbi_id);
 		if (full != null) {
-			XHR.get('<%=dsp.build_url("admin/services/passwall/ping_node")%>', {
+			XHR.get('<%=api.url("ping_node")%>', {
 					address: full.address,
 					port: full.port
 				},
@@ -311,7 +282,7 @@ table td, .table .td {
 		return new Promise((res) => {
 			const dom = nodes[index];
 			if (!dom) res()
-			ajax.post('<%=dsp.build_url("admin/services/passwall/ping_node")%>', {
+			ajax.post('<%=api.url("ping_node")%>', {
 					index: dom.indexs,
 					address: dom.address,
 					port: dom.port
@@ -367,7 +338,7 @@ table td, .table .td {
 		var indexs = nodes[index].indexs;
 		var address = nodes[index].address;
 		var port = nodes[index].port;
-		ajax.post('<%=dsp.build_url("admin/services/passwall/ping_node")%>', {
+		ajax.post('<%=api.url("ping_node")%>', {
 				index: indexs,
 				address: address,
 				port: port
@@ -412,10 +383,10 @@ table td, .table .td {
 			var id = onclick_str.substring(onclick_str.lastIndexOf('/') + 1, onclick_str.length - 1);
 			var td = edit_btn[i].parentNode;
 			var new_div = "";
+			//添加"勾选"框
+			new_div += '<input class="cbi-input-checkbox nodes_select" type="checkbox" cbid="' + id + '" />&nbsp;&nbsp;';
 			//添加"置顶"按钮
 			new_div += '<input class="cbi-button" type="button" value="<%:To Top%>" onclick="_cbi_row_top(\'' + id + '\')"/>&nbsp;&nbsp;';
-			//添加"选择"按钮
-			new_div += '<input class="cbi-button cbi-button-add" type="button" value="<%:Select%>" id="select_' + id + '" onclick="select_node_div(this, \'' + id + '\')"/>&nbsp;&nbsp;';
 			//添加"应用"按钮
 			new_div += '<input class="cbi-button cbi-button-apply" type="button" value="<%:Use%>" id="apply_' + id + '" onclick="open_set_node_div(\'' + id + '\')"/>&nbsp;&nbsp;';
 			//添加"复制"按钮
@@ -432,19 +403,10 @@ table td, .table .td {
 
 <div style="display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; -webkit-justify-content: center; justify-content: center;">
 	<div id="set_node_div">
-		<div class="cbi-value"><%:You choose node is:%><span id="set_node_name"></span></div>
+		<div class="cbi-value"><%:You choose node is:%><a style="color: red" id="set_node_name"></a></div>
 		<div class="cbi-value">
-			<% if tcp_node_num and tonumber(tcp_node_num) >= 1 then %>
-				<% for i = 1, tcp_node_num, 1 do %>
-					<input class="cbi-button cbi-button-edit" type="button" onclick="set_node('tcp',<%=i%>)" value="TCP_<%=i%>" />
-				<% end %>
-			<% end %>
-			
-			<% if udp_node_num and tonumber(udp_node_num) >= 1 then %>
-				<% for i = 1, udp_node_num, 1 do %>
-					<input class="cbi-button cbi-button-edit" type="button" onclick="set_node('udp',<%=i%>)" value="UDP_<%=i%>" />
-				<% end %>
-			<% end %>
+			<input class="cbi-button cbi-button-edit" type="button" onclick="set_node('tcp')" value="TCP" />
+			<input class="cbi-button cbi-button-edit" type="button" onclick="set_node('udp')" value="UDP" />
 			<input class="cbi-button cbi-button-remove" type="button" onclick="close_set_node_div()" value="<%:Close%>" />
 		</div>
 	</div>
